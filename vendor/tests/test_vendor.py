@@ -145,11 +145,19 @@ class TestUpdateVendorByIdView(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
     
     def test_put_vendor_by_id_invalid_data(self):
-        pass
+        """
+        test update vendor using invalid data parameter
+        """
+
+        data ={
+            'name': 1345
+        }
+        response = self.client.put(path=self.url, data=data, format='json', HTTP_AUTHORIZATION= f"Bearer {self.access_token}")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_unauthorized_put_vendor_by_id(self):
         """
-        test put method by an unauthorized user. Expected response status 403.FORBIDDEN
+        test put method by an unauthorized user. Expected response status 401 UNAUTHORIZED
         """
 
         data ={
@@ -174,3 +182,100 @@ class TestUpdateVendorByIdView(APITestCase):
         
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         
+
+
+#-----------------------------------------------------------------------------------------------------------------------------------------#
+
+# Test DELETE vendor by id
+# Method: DELETE
+# endpoint: /api/vendors/{vendor_id}/
+
+
+class TestDeleteVendorByIdView(APITestCase):
+
+    def setUp(self) -> None:
+        user = User.objects.create_user('user11', 'user11@gmail.com', 'pass123')
+        vendor = Vendor.objects.create(user=user, name='name', contact_details='contact', address='address')
+        response = self.client.post(path=reverse('token_obtain_pair'), data={"username":"user11", "password":"pass123"}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.access_token = response.data['access']
+        self.url = reverse('vendor_by_id', args=[vendor.id])
+
+    
+    def tearDown(self) -> None:
+        User.objects.all().delete()
+        Vendor.objects.all().delete()
+
+    
+    def test_delete_vendor_by_id(self):
+        """
+        test delete vendor by id with proper vendor id and authorizathon.
+        expected response status 200.OK
+        """
+
+        response = self.client.delete(path=self.url, HTTP_AUTHORIZATION=f"Bearer {self.access_token}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, "expected response 200.OK")
+    
+    
+    def test_delete_vendor_by_invalid_id(self):
+        """
+        test delete vendor by providing invalid vendor id: expected response status 404.NOT_FOUND
+        """
+
+        response = self.client.delete(
+            path= reverse('vendor_by_id', args=[35]), #invalid vendor id
+            HTTP_AUTHORIZATION = f"Bearer {self.access_token}"
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_404_NOT_FOUND,
+            'expected status code 404_NOT_FOUND'
+        )
+    
+
+    def test_unauthorized_delete_vendor_by_id(self):
+        """
+        test delete vendor by unauthorized user(other than original user)
+        """
+
+        user = User.objects.create_user(
+            'test',
+            'test@gmail.com',
+            'pass123'
+        )
+        token_response = self.client.post(
+            path=reverse('token_obtain_pair'),
+            data={"username": "test", "password": "pass123"},
+            format='json'
+        )
+
+        self.assertEqual(token_response.status_code,  status.HTTP_200_OK)
+        access_token = token_response.data['access']
+        response = self.client.delete(
+            path=self.url,
+            HTTP_AUTHORIZATION= f"Bearer {access_token}"
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+            'expected status code 403 FORBIDDEN'
+        )
+
+
+    def test_unauthenticated_delete_vendor_by_id(self):
+        """
+        test delete vendor by a not authenticated user(anonymous user).
+        expected status code 401 UNAUTHORIZED
+        """
+
+        response = self.client.delete(path=self.url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_401_UNAUTHORIZED,
+            'expected status code 401 UNAUTHORIZED'
+        )
+    
+

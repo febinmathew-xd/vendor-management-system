@@ -94,4 +94,23 @@ class VendorByIdView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({"error":serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+    def delete(self, request, vendor_id):
+        """
+        delete a vendor by its owner using vendor id
+        """
+
+        try:
+            vendor = Vendor.objects.get(id=vendor_id)
+        except Vendor.DoesNotExist:
+            return Response({"error":"invalid vendor id"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if request.user != vendor.user:
+            return Response({"error":"you have no permission to delete this vendor"}, status=status.HTTP_403_FORBIDDEN)
+        
+        vendor.delete()
+
+        return Response({"message": "successfully deleted"}, status=status.HTTP_200_OK)
+
 
