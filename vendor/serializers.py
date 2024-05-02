@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Vendor
+from .models import Vendor, PurchaseOrder
 
 
 
@@ -47,4 +47,11 @@ class VendorReadOnlySerializer(serializers.ModelSerializer): # uses only for rea
     user = UserSerializer()
     class Meta:
         model = Vendor
+        fields = '__all__'
+
+
+
+class PurchaseOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PurchaseOrder
         fields = '__all__'
