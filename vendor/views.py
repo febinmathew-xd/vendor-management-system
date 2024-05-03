@@ -5,6 +5,8 @@ from .serializers import UserSerializer, VendorSerializer, VendorReadOnlySeriali
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from .models import Vendor, PurchaseOrder
+from django.utils import timezone
+from .utils import time_difference_in_hours, find_average_response_time
 
 
 
@@ -186,4 +188,69 @@ class PurchaseOrderByIdView(APIView):
         except PurchaseOrder.DoesNotExist:
             return Response({"error": "purchase order id doesnot exists"}, status=status.HTTP_404_NOT_FOUND)
 
+
+
+class AcknowledgePurchaseOrder(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, po_id):
+        
+        try:
+            purchase_order = PurchaseOrder.objects.get(id=po_id)
             
+            if request.user != purchase_order.vendor.user:
+                return Response({"error": "you do not have permission"}, status= status.HTTP_403_FORBIDDEN)
+            
+            purchase_order.acknowledgment_date = timezone.now()
+            purchase_order.save()
+            
+            
+
+            vendor = purchase_order.vendor
+
+            # find the time taken to acknowledged by the vendor
+            time_taken = time_difference_in_hours(purchase_order.acknowledgment_date, purchase_order.issue_date)
+            
+            # count all the acknowledged purchase orders of the vendor
+            total_purchase_order = vendor.purchase_orders.filter(acknowledgment_date__isnull=False).count()
+            
+            # find the average response time
+            # average response time is calculated after creating an acknowledged purchase order
+            # so no need to worry about zero division error
+            average_response_time = find_average_response_time(vendor.average_response_time,total_purchase_order, time_taken)
+            
+            # modify with new average and save the instance
+            vendor.average_response_time = average_response_time
+            vendor.save()
+            
+            return Response({"message": "acknowledged by the vendor"}, status=status.HTTP_200_OK)
+        
+        
+        except PurchaseOrder.DoesNotExist:
+            return Response({"error": "invalid purchase order ID, ID doesnot exists"}, status=status.HTTP_404_NOT_FOUND)
+        
+        except Exception as e:
+            return Response({"error": "an unexpected error occured"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class VendorPerformanceMetricsView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, vendor_id):
+        
+        try:
+            vendor = Vendor.objects.get(id=vendor_id)
+            data = {}
+            data['on_time_delivery_rate'] = vendor.on_time_delivery_rate
+            data['quality_rating_avg'] = vendor.quality_rating_avg
+            data['average_response_time'] = vendor.average_response_time
+            data['fulfillment_rate'] = vendor.fulfillment_rate
+
+            return Response(data, status=status.HTTP_200_OK)
+
+        except Vendor.DoesNotExist:
+            return Response({"error": "invalid vendor ID, ID not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": "an unexpected error occured"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

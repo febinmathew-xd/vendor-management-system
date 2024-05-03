@@ -30,7 +30,7 @@ class TestPurchaseOrderView(APITestCase):
         PurchaseOrder.objects.all().delete()
     
 
-    def test_create_post_order_view(self):
+    def test_create_purchase_order_view(self):
 
         items = [{"product_name":"mobile", "price":20000}, {"product_name":"watch", "price": 29999}]
         json_items = json.dumps(items)

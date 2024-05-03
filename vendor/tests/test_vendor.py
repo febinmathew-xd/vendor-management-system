@@ -279,3 +279,69 @@ class TestDeleteVendorByIdView(APITestCase):
         )
     
 
+
+# test vendor performance metrics retrival
+# method GET
+# endpoint /api/vendors/{vendor_id}/performance/
+# 
+# Test cases: 
+# 1. test with proper data
+# 2. test with unauthorized user
+# 3. test with invalid vendor id
+
+class TestVendorPerformanceMetrics(APITestCase):
+
+    def setUp(self) -> None:
+        user = User.objects.create_user('test', 'test@mail.com', 'pass123')
+        self.vendor = Vendor.objects.create(
+            user=user,
+            name='name',
+            contact_details='contact',
+            address='address'
+        )
+        token_response = self.client.post(
+            path= reverse('token_obtain_pair'),
+            data={
+                "username": "test",
+                "password": "pass123"
+            }
+        )
+        self.access_token = token_response.data['access']
+        self.url = reverse('performance_metrics', args=[self.vendor.id])
+    
+
+    def tearDown(self) -> None:
+        User.objects.all().delete()
+        Vendor.objects.all().delete()
+    
+
+    # 1. Test with proper data and authorization
+    # expected status code 200.OK
+    # response data: complete performance metrics of the given vendor
+
+    def test_get_performance_metrics(self):
+
+        response = self.client.get(path=self.url, HTTP_AUTHORIZATION=f"Bearer {self.access_token}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    # 2. Test unauthorized performance GET request
+    # expected status code 401 UNAUTHORIZED
+    # response data: error
+
+    def test_get_performance_metrics_unauthorized(self):
+        response = self.client.get(path=self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    
+    # 3. Test GET performance matrics with invalid vendor ID
+    # expected status code 404.NOT_FOUND
+    # response data: error
+
+    def test_get_performance_metrics_invalid_id(self):
+        response =self.client.get(
+            path=reverse('performance_metrics', args=[312]), # invalid ID
+            HTTP_AUTHORIZATION= f"Bearer {self.access_token}"
+            )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+
