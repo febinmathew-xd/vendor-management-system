@@ -280,7 +280,7 @@ class TestDeleteVendorByIdView(APITestCase):
     
 
 
-# test vendor performance metrics retrival
+# test vendor performance metrics retrival by vendor ID
 # method GET
 # endpoint /api/vendors/{vendor_id}/performance/
 # 
@@ -304,7 +304,8 @@ class TestVendorPerformanceMetrics(APITestCase):
             data={
                 "username": "test",
                 "password": "pass123"
-            }
+            },
+            format='json'
         )
         self.access_token = token_response.data['access']
         self.url = reverse('performance_metrics', args=[self.vendor.id])
