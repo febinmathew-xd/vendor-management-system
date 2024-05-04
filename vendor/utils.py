@@ -18,3 +18,21 @@ def find_average_response_time(current_avg, total_po, value ):
     new_average = new_total/total_po
 
     return round(new_average, 2)
+
+def find_quality_rating_average(current_avg_rating, total_rating, value, fresh=True, prev_rating=None):
+
+
+    total_average = current_avg_rating*total_rating
+    if fresh == True:
+        new_average_rating = (total_average + value)/(total_rating+1)
+        return round(new_average_rating, 2)
+    if not fresh and not prev_rating:
+        raise ValueError("previous ratings should provide of value is not fresh")
+    new_average_rating = (total_average-prev_rating+ value)/ total_rating
+    return round(new_average_rating, 2)
+
+
+# def on_time_delivery_rate(current_rate, total, value):
+#     total_delivery = current_rate*total
+#     new_rate = (total_delivery+value)/(total+1)
+#     return round(new_rate,3)

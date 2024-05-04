@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 import time, random
 
 
-# vendor Model
+# Vendor Model
 # This model stores essential information about each vendor and their performance metrics.
 class Vendor(models.Model):
     user = models.ForeignKey(User, related_name='vendors', on_delete=models.CASCADE) # link to the User model
@@ -32,6 +32,13 @@ class Vendor(models.Model):
         if not self.vendor_code:
             self.vendor_code = self.generate_vendor_code() # if vendor code is not provided by frontend, generate a unique code
         super().save(*args, **kwargs)                      # and save the instance
+
+
+
+
+
+#--------------------------------------------------------------------------------------------------------------------------------------#
+
 
 
 
@@ -68,10 +75,17 @@ class PurchaseOrder(models.Model):
     def save(self, *args, **kwargs):
         if not self.po_number:
             self.po_number = self.generate_po_number() # if po number is not provided, generate a unique code
-        super().save(*args, **kwargs)                      
+        super().save(*args, **kwargs)    
 
-    
 
+
+
+#----------------------------------------------------------------------------------------------------------------------------#                  
+
+
+
+# Historical Performance model   
+# This model optionally stores historical data on vendor performance, enabling trend analysis.
 class HistoricalPerformance(models.Model):
     vendor = models.ForeignKey(Vendor, related_name='historical_performances', on_delete=models.CASCADE)  # link to the Vendor model
     date = models.DateTimeField(auto_now_add=True)    # date of the performance record
