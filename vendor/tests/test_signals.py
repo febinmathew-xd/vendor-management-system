@@ -41,7 +41,8 @@ class TestQualityRatingSignals(APITestCase):
         Vendor.objects.all().delete()
         PurchaseOrder.objects.all().delete()
     
-
+    # test average quility rating of the vendor changes when a quality rating of any purchase order of the vendor changes
+    # expected behaviour: purchase order signal handler function trigers properly and updates quality rating average
     def test_is_quality_rating_changed(self):
         self.client.put(
             path= reverse('purchase_order_by_id', args=[self.purchase_order.id]),
@@ -67,7 +68,7 @@ class TestQualityRatingSignals(APITestCase):
         self.assertEqual(po.quality_rating, 4.6)
         self.assertEqual(vendor.quality_rating_avg, 4.6)
     
-
+    # test quality rating average updated corectly when all the purchase order has valid rating
     def test_quality_rating_provided_all(self):
         ratings = [1.0, 2.0, 3.0, 4.0]
         for i in range(len(ratings)):
@@ -83,12 +84,14 @@ class TestQualityRatingSignals(APITestCase):
         vendor = Vendor.objects.get(id=self.vendor.id)
         self.assertEqual(vendor.quality_rating_avg, sum(ratings)/len(ratings))
     
-
+    # test quality rating average updates properly even any non rated purchase order exists.
+    # only calculate quality rating if provided..doesnot count all completed purchase order as total ratings.
     def test_with_missing_quality_rating(self):
-
+        #add non rated purchase order
         for _ in range(6):
             PurchaseOrder.objects.create(vendor=self.vendor, **self.data)
-    
+        
+        # add purchase order and update quality ratings for all instance
         ratings = [1.0, 2.0, 3.0, 4.0]
         for i in range(len(ratings)):
             purchase_order = PurchaseOrder.objects.create(vendor=self.vendor, **self.data)
@@ -371,8 +374,95 @@ class TestOnTimeDeliveryRate(APITestCase):
 class TestFulfillmentRate(APITestCase):
 
     def setUp(self) -> None:
-        pass
+        user = User.objects.create_user('test', 'test@mail.com', 'pass123')
+        self.vendor = Vendor.objects.create(
+            user=user,
+            name='name',
+            contact_details='contact',
+            address='address'
+        )
+        token_response = self.client.post(
+            path=reverse('token_obtain_pair'),
+            data={'username':'test', 'password': 'pass123'},
+            format='json'
+        )
+        self.access_token = token_response.data['access']
+        self.data = {
+            'delivery_date': timezone.now()+ timedelta(days=3),
+            'items': [{'product_name': 'mobile'}, {'product_name': 'watch'}],
+            'quantity': 2,
+            'issue_date': timezone.now()-timedelta(days=1) 
+            }
+        self.reverse_name = 'purchase_order_by_id'
 
     def tearDown(self) -> None:
-        pass
+        User.objects.all().delete()
+        Vendor.objects.all().delete()
+        PurchaseOrder.objects.all().delete()
+    
+
+    def test_empty_issued_purchase_order(self):
+
+        for i in range(5):
+            PurchaseOrder.objects.create(
+                vendor=self.vendor,
+                **self.data
+            )
+        
+        self.assertEqual(
+            Vendor.objects.get(id=self.vendor.id).fulfillment_rate,
+            0.0,
+            'expected fulfillment rate is zeor'
+        )
+    
+
+    def test_mixed_status_purchase_order(self):
+
+        for i in range(5):
+            purchase_order=PurchaseOrder.objects.create(
+                    vendor=self.vendor,
+                    **self.data
+                )
+            response = self.client.put(
+                path= reverse(self.reverse_name, args=[purchase_order.id]),
+                data={"status": "completed"},
+                format='json',
+                HTTP_AUTHORIZATION = f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        self.assertEqual(
+            Vendor.objects.get(id=self.vendor.id).fulfillment_rate,
+            1.0,
+            'expected fulfillment rate 1.0'
+        )
+        
+        # add pending purchase order instances
+
+        for _ in range(5):
+            PurchaseOrder.objects.create(
+                vendor=self.vendor,
+                **self.data
+            )
+        self.assertEqual(
+            Vendor.objects.get(id=self.vendor.id).fulfillment_rate,
+            1.0,
+            'expected value 1.0. value remains same eventhough pending purchase order exists'
+        )
+
+        # add canceled purchase orders
+
+        for _ in range(5):
+            purchase_order = PurchaseOrder.objects.create(vendor=self.vendor, **self.data)
+            response = self.client.put(
+                path=reverse(self.reverse_name, args=[purchase_order.id]),
+                data={"status": "canceled"},
+                format='json',
+                HTTP_AUTHORIZATION = f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        vendor = Vendor.objects.get(id=self.vendor.id)
+        
+        self.assertEqual(vendor.fulfillment_rate, 5/10)
+
 

@@ -346,3 +346,10 @@ class TestVendorPerformanceMetrics(APITestCase):
 
 
 
+class TestPurchaseOrderDeletePerfomanceMetrics(APITestCase):
+
+    def setUp(self) -> None:
+        pass
+
+    def tearDown(self) -> None:
+        pass
