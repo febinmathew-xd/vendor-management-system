@@ -9,7 +9,7 @@ from datetime import timedelta
 
 
 
-class TestQualityRatingSignals(APITestCase):
+class TestQualityRatingSignal(APITestCase):
 
     def setUp(self) -> None:
         self.user = User.objects.create_user('test','test@mail.com', 'pass123')
@@ -190,7 +190,7 @@ class TestQualityRatingSignals(APITestCase):
     
 
 
-class TestOnTimeDeliveryRate(APITestCase):
+class TestOnTimeDeliveryRateSignal(APITestCase):
     
     def setUp(self) -> None:
         user = User.objects.create_user('test', 'test@mail.com', 'pass123')
@@ -371,7 +371,7 @@ class TestOnTimeDeliveryRate(APITestCase):
 
 
 
-class TestFulfillmentRate(APITestCase):
+class TestFulfillmentRateSignal(APITestCase):
 
     def setUp(self) -> None:
         user = User.objects.create_user('test', 'test@mail.com', 'pass123')
@@ -466,3 +466,401 @@ class TestFulfillmentRate(APITestCase):
         self.assertEqual(vendor.fulfillment_rate, 5/10)
 
 
+class TestPurchaseOrderDeletePerfomanceMetricsSignal(APITestCase):
+
+    def setUp(self) -> None:
+        user = User.objects.create_user('test', 'test@mail.com', 'pass123')
+        self.vendor = Vendor.objects.create(
+            user=user,
+            name='name',
+            contact_details='contact',
+            address='address'
+        )
+        token_response = self.client.post(path=reverse('token_obtain_pair'), data={'username':'test','password':'pass123'}, format='json')
+        self.assertEqual(token_response.status_code, status.HTTP_200_OK)
+        self.access_token = token_response.data['access']
+        self.reverse_name = 'purchase_order_by_id'
+        self.data = {
+            'delivery_date': timezone.now()+ timedelta(days=3),
+            'items': [{'product_name': 'mobile'}, {'product_name': 'watch'}],
+            'quantity': 2,
+            'issue_date': timezone.now()-timedelta(hours=3) 
+            }
+        
+
+    def tearDown(self) -> None:
+        User.objects.all().delete()
+        Vendor.objects.all().delete()
+        PurchaseOrder.objects.all().delete()
+    
+
+    def test_only_one_purchase_order(self):
+        purchase_order = PurchaseOrder.objects.create(vendor=self.vendor, **self.data)
+        #acknowledge purchase order
+        response = self.client.post(
+            path=reverse('acknowledge_purchase_order', args=[purchase_order.id]),
+            HTTP_AUTHORIZATION= f"Bearer {self.access_token}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertNotEqual(
+            Vendor.objects.get(id=self.vendor.id),
+            0.0,
+            'value should change from zero to new value'
+        )
+        self.assertIsNotNone(PurchaseOrder.objects.get(id=purchase_order.id).acknowledgment_date)
+        
+        #change status to completed
+
+        response = self.client.put(
+            path= reverse(self.reverse_name, args=[purchase_order.id]),
+            data={"status": "completed"},
+            format='json',
+            HTTP_AUTHORIZATION = f"Bearer {self.access_token}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        vendor= Vendor.objects.get(id=self.vendor.id)
+        self.assertNotEqual(vendor.on_time_delivery_rate, 0.0 )
+        self.assertEqual(vendor.on_time_delivery_rate, 1.0)
+        self.assertEqual(vendor.fulfillment_rate, 1.0)
+
+        # provide a quality rating
+
+        response = self.client.put(
+            path=reverse(self.reverse_name, args=[purchase_order.id]),
+            data= {"quality_rating": 5.0},
+            format='json',
+            HTTP_AUTHORIZATION= f"Bearer {self.access_token}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Vendor.objects.get(id=self.vendor.id).quality_rating_avg, 5.0)
+
+        # delete the purchase order
+
+        response = self.client.delete(
+            path= reverse(self.reverse_name, args=[purchase_order.id]),
+            HTTP_AUTHORIZATION = f"Bearer {self.access_token}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        vendor = Vendor.objects.get(id=self.vendor.id)
+        # make sure all value reset to initial value
+        self.assertEqual(vendor.quality_rating_avg, 0.0)
+        self.assertEqual(vendor.fulfillment_rate, 0.0)
+        self.assertEqual(vendor.average_response_time, 0.0)
+    
+
+
+    def test_multiple_purchase_order_delete(self):
+        n = 5
+        # add pending purchase orders
+        pending_orders =[]
+        for i in range(n):
+            purchase_order=PurchaseOrder.objects.create(vendor=self.vendor, **self.data)
+            pending_orders.append(purchase_order.id)
+   
+        
+        # add some acknowledged only purchase orders
+        acknowledged_only_orders = []
+        for i in range(n):
+            purchase_order = PurchaseOrder.objects.create(vendor=self.vendor, **self.data)
+            response = self.client.post(
+                path=reverse('acknowledge_purchase_order', args=[purchase_order.id]),
+                HTTP_AUTHORIZATION = f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            acknowledged_only_orders.append(purchase_order.id)
+
+
+        # add some ontime delivery purchase orders
+        ontime_orders = []
+        for i in range(n):
+            purchase_order = PurchaseOrder.objects.create(vendor=self.vendor, **self.data)
+            response = self.client.post(
+                path=reverse('acknowledge_purchase_order', args=[purchase_order.id]),
+                HTTP_AUTHORIZATION = f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            
+            response = self.client.put(
+                path= reverse(self.reverse_name, args=[purchase_order.id]),
+                data= {"status":"completed"},
+                format='json',
+                HTTP_AUTHORIZATION = f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            ontime_orders.append(purchase_order.id)
+
+
+        # add some over time delivery purchase orders
+        overtime_orders =[]
+        for i in range(n):
+            purchase_order = PurchaseOrder.objects.create(
+                vendor =self.vendor,
+                delivery_date = timezone.now()- timedelta(days=1),
+                items =[{'product_name': 'mobile'}, {'product_name': 'watch'}],
+                quantity= 2,
+                issue_date= timezone.now()-timedelta(hours=3)
+                )
+            response = self.client.post(
+                path=reverse('acknowledge_purchase_order', args=[purchase_order.id]),
+                HTTP_AUTHORIZATION = f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            
+            response = self.client.put(
+                path= reverse(self.reverse_name, args=[purchase_order.id]),
+                data= {"status":"completed"},
+                format='json',
+                HTTP_AUTHORIZATION = f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            overtime_orders.append(purchase_order.id)
+            
+
+
+        # add some quality rated purchase orders
+        quality_rated_orders= []
+        for i in range(n):
+            purchase_order = PurchaseOrder.objects.create(vendor=self.vendor, **self.data)
+            response = self.client.post(
+                path=reverse('acknowledge_purchase_order', args=[purchase_order.id]),
+                HTTP_AUTHORIZATION = f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            
+            response = self.client.put(
+                path= reverse(self.reverse_name, args=[purchase_order.id]),
+                data= {"status":"completed", "quality_rating":4.0},
+                format='json',
+                HTTP_AUTHORIZATION = f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            quality_rated_orders.append(purchase_order.id)
+
+
+        # add some canceled purchase orders
+        canceled_orders = []
+        for i in range(n):
+            purchase_order = PurchaseOrder.objects.create(vendor=self.vendor, **self.data)
+            response = self.client.post(
+                path=reverse('acknowledge_purchase_order', args=[purchase_order.id]),
+                HTTP_AUTHORIZATION = f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            
+            response = self.client.put(
+                path= reverse(self.reverse_name, args=[purchase_order.id]),
+                data= {"status":"canceled"},
+                format='json',
+                HTTP_AUTHORIZATION = f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            canceled_orders.append(purchase_order.id)
+        
+        #check metrics
+        vendor = Vendor.objects.get(id=self.vendor.id)
+        #check fulfillment rate
+        self.assertEqual(vendor.fulfillment_rate, (len(ontime_orders)+len(overtime_orders)+len(quality_rated_orders))/(len(ontime_orders)+len(overtime_orders)+len(quality_rated_orders)+len(canceled_orders)))
+        self.assertEqual(
+            vendor.fulfillment_rate, 
+            vendor.purchase_orders.filter(status='completed').count()/(vendor.purchase_orders.filter(status='completed').count()+vendor.purchase_orders.filter(status='canceled').count())
+        )
+        #check average response time
+        self.assertAlmostEquals(
+            vendor.average_response_time,3.0, places=1)
+        #check average quality rating
+        self.assertEqual(vendor.quality_rating_avg, 4.0)
+        
+        m =3
+        # delete some pending purchase orders
+        for i in range(m):
+            response = self.client.delete(
+                path= reverse(self.reverse_name, args=[pending_orders.pop()]),
+                HTTP_AUTHORIZATION= f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        #check metrics
+        vendor = Vendor.objects.get(id=self.vendor.id)
+        #check fulfillment rate
+        self.assertEqual(vendor.fulfillment_rate, (len(ontime_orders)+len(overtime_orders)+len(quality_rated_orders))/(len(ontime_orders)+len(overtime_orders)+len(quality_rated_orders)+len(canceled_orders)))
+        self.assertEqual(
+            vendor.fulfillment_rate, 
+            vendor.purchase_orders.filter(status='completed').count()/(vendor.purchase_orders.filter(status='completed').count()+vendor.purchase_orders.filter(status='canceled').count())
+        )
+        #check average response time
+        self.assertAlmostEquals(vendor.average_response_time,3.0, places=1)
+        #check average quality rating
+        self.assertEqual(vendor.quality_rating_avg, 4.0)
+
+        # delete some acknowledged only purchase orders
+        for _ in range(m):
+            response = self.client.delete(
+                path= reverse(self.reverse_name, args=[acknowledged_only_orders.pop()]),
+                HTTP_AUTHORIZATION= f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+         #check metrics
+        vendor = Vendor.objects.get(id=self.vendor.id)
+        #check fulfillment rate
+        self.assertEqual(vendor.fulfillment_rate, (len(ontime_orders)+len(overtime_orders)+len(quality_rated_orders))/(len(ontime_orders)+len(overtime_orders)+len(quality_rated_orders)+len(canceled_orders)))
+        self.assertEqual(
+            vendor.fulfillment_rate, 
+            vendor.purchase_orders.filter(status='completed').count()/(vendor.purchase_orders.filter(status='completed').count()+vendor.purchase_orders.filter(status='canceled').count())
+        )
+        #check average response time
+        self.assertAlmostEquals(vendor.average_response_time,3.0, places=1)
+        #check average quality rating
+        self.assertEqual(vendor.quality_rating_avg, 4.0)
+
+
+        # delete some ontime delivery purchase orders
+        for _ in range(m):
+            response = self.client.delete(
+                path= reverse(self.reverse_name, args=[ontime_orders.pop()]),
+                HTTP_AUTHORIZATION= f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+         #check metrics
+        vendor = Vendor.objects.get(id=self.vendor.id)
+        #check fulfillment rate
+        self.assertEqual(vendor.fulfillment_rate, (len(ontime_orders)+len(overtime_orders)+len(quality_rated_orders))/(len(ontime_orders)+len(overtime_orders)+len(quality_rated_orders)+len(canceled_orders)))
+        self.assertEqual(
+            vendor.fulfillment_rate, 
+            vendor.purchase_orders.filter(status='completed').count()/(vendor.purchase_orders.filter(status='completed').count()+vendor.purchase_orders.filter(status='canceled').count())
+        )
+        #check average response time
+        self.assertAlmostEquals(vendor.average_response_time,3.0, places=1)
+        #check average quality rating
+        self.assertEqual(vendor.quality_rating_avg, 4.0)
+
+
+        # delete some overtime delivery purchase orders
+        for _ in range(m):
+            response = self.client.delete(
+                path= reverse(self.reverse_name, args=[overtime_orders.pop()]),
+                HTTP_AUTHORIZATION= f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+         #check metrics
+        vendor = Vendor.objects.get(id=self.vendor.id)
+        #check fulfillment rate
+        self.assertEqual(vendor.fulfillment_rate, (len(ontime_orders)+len(overtime_orders)+len(quality_rated_orders))/(len(ontime_orders)+len(overtime_orders)+len(quality_rated_orders)+len(canceled_orders)))
+        self.assertEqual(
+            vendor.fulfillment_rate, 
+            vendor.purchase_orders.filter(status='completed').count()/(vendor.purchase_orders.filter(status='completed').count()+vendor.purchase_orders.filter(status='canceled').count())
+        )
+        #check average response time
+        self.assertAlmostEquals(vendor.average_response_time,3.0, places=1)
+        #check average quality rating
+        self.assertEqual(vendor.quality_rating_avg, 4.0)
+
+
+        # delete some quality rated purchase orders
+        for _ in range(m):
+            response = self.client.delete(
+                path= reverse(self.reverse_name, args=[quality_rated_orders.pop()]),
+                HTTP_AUTHORIZATION= f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+         #check metrics
+        vendor = Vendor.objects.get(id=self.vendor.id)
+        #check fulfillment rate
+        self.assertEqual(vendor.fulfillment_rate, (len(ontime_orders)+len(overtime_orders)+len(quality_rated_orders))/(len(ontime_orders)+len(overtime_orders)+len(quality_rated_orders)+len(canceled_orders)))
+        self.assertEqual(
+            vendor.fulfillment_rate, 
+            vendor.purchase_orders.filter(status='completed').count()/(vendor.purchase_orders.filter(status='completed').count()+vendor.purchase_orders.filter(status='canceled').count())
+        )
+        #check average response time
+        self.assertAlmostEquals(vendor.average_response_time,3.0, places=1)
+        #check average quality rating
+        self.assertEqual(vendor.quality_rating_avg, 4.0)
+
+
+
+        # delete some canceled purchase orders
+        for _ in range(m):
+            response = self.client.delete(
+                path= reverse(self.reverse_name, args=[canceled_orders.pop()]),
+                HTTP_AUTHORIZATION= f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+         #check metrics
+        vendor = Vendor.objects.get(id=self.vendor.id)
+        #check fulfillment rate
+        self.assertEqual(vendor.fulfillment_rate, (len(ontime_orders)+len(overtime_orders)+len(quality_rated_orders))/(len(ontime_orders)+len(overtime_orders)+len(quality_rated_orders)+len(canceled_orders)))
+        self.assertEqual(
+            vendor.fulfillment_rate, 
+            vendor.purchase_orders.filter(status='completed').count()/(vendor.purchase_orders.filter(status='completed').count()+vendor.purchase_orders.filter(status='canceled').count())
+        )
+        #check average response time
+        self.assertAlmostEquals(vendor.average_response_time,3.0, places=1)
+        #check average quality rating
+        self.assertEqual(vendor.quality_rating_avg, 4.0)
+
+
+        
+        # delete all purchase orders orders
+        # -------------------------------------------------------#
+        # delete all pending orders
+        for _ in range(len(pending_orders)):
+            response = self.client.delete(
+                path= reverse(self.reverse_name, args=[pending_orders.pop()]),
+                HTTP_AUTHORIZATION= f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # delete all acknowledged only orders
+        for _ in range(len(acknowledged_only_orders)):
+            response = self.client.delete(
+                path= reverse(self.reverse_name, args=[acknowledged_only_orders.pop()]),
+                HTTP_AUTHORIZATION= f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # delete all ontime orders
+        for _ in range(len(ontime_orders)):
+            response = self.client.delete(
+                path= reverse(self.reverse_name, args=[ontime_orders.pop()]),
+                HTTP_AUTHORIZATION= f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # delete all overtime orders
+        for _ in range(len(overtime_orders)):
+            response = self.client.delete(
+                path= reverse(self.reverse_name, args=[overtime_orders.pop()]),
+                HTTP_AUTHORIZATION= f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # delete all quality rated orders
+        for _ in range(len(quality_rated_orders)):
+            response = self.client.delete(
+                path= reverse(self.reverse_name, args=[quality_rated_orders.pop()]),
+                HTTP_AUTHORIZATION= f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # delete all canceled orders
+        for _ in range(len(canceled_orders)):
+            response = self.client.delete(
+                path= reverse(self.reverse_name, args=[canceled_orders.pop()]),
+                HTTP_AUTHORIZATION= f"Bearer {self.access_token}"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+         #check metrics
+        vendor = Vendor.objects.get(id=self.vendor.id)
+        #check fulfillment rate
+        self.assertEqual(vendor.fulfillment_rate, 0.0)
+        #check average response time
+        self.assertEqual(vendor.average_response_time,0.0)
+        #check average quality rating
+        self.assertEqual(vendor.quality_rating_avg, 0.0)
+
+        
