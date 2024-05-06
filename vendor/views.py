@@ -9,17 +9,19 @@ from django.utils import timezone
 from .utils import time_difference_in_hours, find_average_response_time
 
 
-
+# create user view
+# Endpont: POST /api/user/register/
 class CreateUserView(generics.CreateAPIView):
     """
     create a base user. only valid user can call all other api
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [AllowAny,]  #anyone call create user
+    permission_classes = [AllowAny,]  #anyone can create user
 
 
-
+# vendor view
+# endpont: /api/vendors/
 class VendorView(APIView):
 
     permission_classes = [IsAuthenticated] #only authenticated user able to call this view
@@ -45,7 +47,8 @@ class VendorView(APIView):
         serializer = VendorReadOnlySerializer(vendors, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
+# vendor by id view
+# endpoint: /api/vendors/{vendor_id}/
 class VendorByIdView(APIView):
     
     permission_classes = [IsAuthenticated]  #only authenticated user can call this view
@@ -105,12 +108,14 @@ class VendorByIdView(APIView):
         return Response({"message": "successfully deleted"}, status=status.HTTP_200_OK)
 
 
-
+#pruchase order view
+#endpoint : /api/purchase_orders/
 
 class PurchaseOrderView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    # create a purchase order
     def post(self, request):
         
         serializer = PurchaseOrderSerializer(data=request.data)
@@ -120,6 +125,7 @@ class PurchaseOrderView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
+    # retrive all purchase orders with an option to filter with vendor
     def get(self, request):
 
         vendor_id = request.GET.get('vendor_id')
@@ -139,11 +145,12 @@ class PurchaseOrderView(APIView):
             return Response({"error": "vendor id not provided"}, status=status.HTTP_400_BAD_REQUEST)
         
         
-
+# Purchase order by id view
+# endpont: /api/purchase_orders/{po_id}/
 class PurchaseOrderByIdView(APIView):
 
     permission_classes = [IsAuthenticated]
-
+    # retive a specific purchase order by its id
     def get(self, request, po_id):
         
         try:
@@ -155,7 +162,7 @@ class PurchaseOrderByIdView(APIView):
         except PurchaseOrder.DoesNotExist:
             return Response({"error": "invalid purchase order id. purchase order not found"}, status=status.HTTP_404_NOT_FOUND)
         
-    
+    # uspdate a purchase order by its id
     def put(self, request, po_id):
 
         try:
@@ -174,7 +181,7 @@ class PurchaseOrderByIdView(APIView):
         except PurchaseOrder.DoesNotExist:
             return Response({"error": "purchase order id doesnot exits"}, status=status.HTTP_404_NOT_FOUND)
         
-
+    # delete a purchase order by its id
     def delete(self, request, po_id):
 
         try:
@@ -189,11 +196,13 @@ class PurchaseOrderByIdView(APIView):
             return Response({"error": "purchase order id doesnot exists"}, status=status.HTTP_404_NOT_FOUND)
 
 
-
+# Acknowledge purchase order by its id
+# endpont POST /api/purchase_orders/{vendor_id}/acknowledge/
 class AcknowledgePurchaseOrder(APIView):
 
     permission_classes = [IsAuthenticated]
-
+    
+    # acknowledge a purchase order
     def post(self, request, po_id):
         
         try:
@@ -204,8 +213,7 @@ class AcknowledgePurchaseOrder(APIView):
             
             purchase_order.acknowledgment_date = timezone.now()
             purchase_order.save()
-            
-            
+                       
 
             vendor = purchase_order.vendor
 
@@ -238,6 +246,7 @@ class VendorPerformanceMetricsView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    # Retive performance metrics of a vendor by its vendor id
     def get(self, request, vendor_id):
         
         try:

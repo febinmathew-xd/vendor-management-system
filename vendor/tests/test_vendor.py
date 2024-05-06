@@ -5,6 +5,19 @@ from rest_framework import status
 from django.contrib.auth.models import User
 
 
+# OVERVIEW
+# This test module covers all tesing related to the vendor creation, retival, delete and updation operation.
+# 1. TestVendorView: tests vendor creation and retrival of all vendors
+# 2. GetVendorbyID : Tests retrive a specific vendor by id
+# 3. UpdateVendorbyID: Tests update a specifc vendor by id
+# 4. DeleteVendorbyID : Tests delete a specific vendor by id
+# 5. Retive vendor performance metrics: Tests retrive performance metric of a specific vendor by id
+
+#-------------------------------------------------------------------------------------------------------------# 
+
+# 1. Test create a vendor and list all vendor
+# Endpont : /api/vendors/
+# Methods : POST, GET
 class TestVendorView(APITestCase):
 
     def setUp(self) -> None:
@@ -20,6 +33,7 @@ class TestVendorView(APITestCase):
         Vendor.objects.all().delete()
         User.objects.all().delete()
     
+    # Test vendor creation with proper data and authorization
     def test_vendor_creation(self):
 
         data = {
@@ -32,7 +46,8 @@ class TestVendorView(APITestCase):
 
         response = self.client.post(path=self.url, data=data, format='json',HTTP_AUTHORIZATION= f"Bearer {self.access_token}")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    
+
+    # test vendor creation with unauthorized user
     def test_unauthorized_vendor_creation(self):
         data = {
             'user': self.user.id,
@@ -44,7 +59,7 @@ class TestVendorView(APITestCase):
         response = self.client.post(path=self.url, data=data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
     
-
+    # TEst vendor creation with invalid data
     def test_invalid_data_vendor_creation(self):
         data ={
             'name': 'user2'
@@ -52,18 +67,22 @@ class TestVendorView(APITestCase):
 
         response = self.client.post(path=self.url, data=data, format='json', HTTP_AUTHORIZATION=f"Bearer {self.access_token}")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-    
+
+    # test list all vendos with authorization
     def test_get_vendors(self):
         response = self.client.get(path=self.url, HTTP_AUTHORIZATION=f"Bearer {self.access_token}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    # test list all vendors without authorization
     def test_unauthorized_get_vendors(self):
         response = self.client.get(path=self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     
 
-
+# 2. Test get vendor by id
+#   Endpont: /api/vendors/{vendor_id}
+#   Method : GET
 class TestGetVendorByIdView(APITestCase):
 
     def setUp(self) -> None:
@@ -92,12 +111,10 @@ class TestGetVendorByIdView(APITestCase):
 
 #-----------------------------------------------------------------------------------------------#
 
-# Test Vendor update by Id
+#3. Test Vendor update by Id
 
 # Method: PUT
 # endpoint: /api/vendors/{vendor_id}/
-
-
 
 class TestUpdateVendorByIdView(APITestCase):
     
@@ -186,10 +203,9 @@ class TestUpdateVendorByIdView(APITestCase):
 
 #-----------------------------------------------------------------------------------------------------------------------------------------#
 
-# Test DELETE vendor by id
+#4. Test DELETE vendor by id
 # Method: DELETE
 # endpoint: /api/vendors/{vendor_id}/
-
 
 class TestDeleteVendorByIdView(APITestCase):
 
@@ -280,7 +296,7 @@ class TestDeleteVendorByIdView(APITestCase):
     
 
 
-# test vendor performance metrics retrival by vendor ID
+# 5. test vendor performance metrics retrival by vendor ID
 # method GET
 # endpoint /api/vendors/{vendor_id}/performance/
 # 

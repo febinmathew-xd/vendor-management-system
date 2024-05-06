@@ -6,9 +6,25 @@ from rest_framework import status
 from django.urls import reverse
 from datetime import timedelta
 
+# OVERVIEW
+# Test cases in this module covers all the tests related to the signal handler which used to handle the 
+# real time calculation of the vendor performance metrics
+# This module includes four test classes
+# 1. Test Quality Rating Average : which cover all tests related to the realtime calculation and updation of the
+#    quality rating average of the vendor when ever the quality rating field of the purchase order gets updates
+# 2. Test Average Response Time: which covers all tests ralated to the real time calculation and updation of the 
+#    average response time of the vendor when ever a vendor acknowledge purchase order.
+# 3. Test fulfullment Rate : covers all tests ralated to the calculation and updation of fulfillment rate of the 
+#    vendor when ever the status of the purchase order changes to completed or canceled.
+# 4. Test Metrics When Purchase Order Deleted : covers all tests related to the accurate calculation of all the metrics
+#    of the vendor when a purchase order which used to calculate current metrics gets deleted.
+#    tests post_delete signal properly recalculate and update metrics accurately.
+
+#---------------------------------------------------------------------------------------------------------------------------#
 
 
-
+# 1. Test Quality Rating average Metrics gets calculated when ever a quality rating is provided to a purchase order
+            
 class TestQualityRatingSignal(APITestCase):
 
     def setUp(self) -> None:
@@ -106,7 +122,7 @@ class TestQualityRatingSignal(APITestCase):
         vendor = Vendor.objects.get(id=self.vendor.id)
         self.assertEqual(vendor.quality_rating_avg, sum(ratings)/len(ratings))
     
-
+    # prpoper calculation if an existing quality rating modified. replace old with new and recalculate metrics.
     def test_modify_existing_quality_rating(self):
 
         ratings = [1.0, 2.0, 3.0, 4.0, 5.0]
@@ -159,7 +175,8 @@ class TestQualityRatingSignal(APITestCase):
             sum(new_ratings)/len(new_ratings)
         )
     
-
+    # check if any other field which is not required for the calculation of the metrics changes not triger
+    # metrics calculation
     def test_other_field_updation_affects(self):
 
         ratings = [1.0, 2.0, 3.0, 4.0]
@@ -189,7 +206,7 @@ class TestQualityRatingSignal(APITestCase):
         )
     
 
-
+# 2. Test on time delivery rate metrics
 class TestOnTimeDeliveryRateSignal(APITestCase):
     
     def setUp(self) -> None:
@@ -345,7 +362,8 @@ class TestOnTimeDeliveryRateSignal(APITestCase):
             places=2
         )
     
-
+    # check if any other field which is not required for the calculation of the metrics changes not triger
+    # metrics calculation
     def test_other_field_updation_affects(self):
 
         purchase_order = PurchaseOrder.objects.create(
@@ -370,7 +388,7 @@ class TestOnTimeDeliveryRateSignal(APITestCase):
 
 
 
-
+# 3. Test fulfillment rate metrics calculations
 class TestFulfillmentRateSignal(APITestCase):
 
     def setUp(self) -> None:
@@ -400,7 +418,7 @@ class TestFulfillmentRateSignal(APITestCase):
         Vendor.objects.all().delete()
         PurchaseOrder.objects.all().delete()
     
-
+    # Test with empty issued purchase orders
     def test_empty_issued_purchase_order(self):
 
         for i in range(5):
@@ -412,10 +430,10 @@ class TestFulfillmentRateSignal(APITestCase):
         self.assertEqual(
             Vendor.objects.get(id=self.vendor.id).fulfillment_rate,
             0.0,
-            'expected fulfillment rate is zeor'
+            'expected fulfillment rate is zero'
         )
     
-
+    # test with completed , pending and canceled purchase orders
     def test_mixed_status_purchase_order(self):
 
         for i in range(5):
@@ -465,7 +483,7 @@ class TestFulfillmentRateSignal(APITestCase):
         
         self.assertEqual(vendor.fulfillment_rate, 5/10)
 
-
+# 4. Test  Metrics recalculation when a purchase order deleted.
 class TestPurchaseOrderDeletePerfomanceMetricsSignal(APITestCase):
 
     def setUp(self) -> None:
@@ -493,7 +511,7 @@ class TestPurchaseOrderDeletePerfomanceMetricsSignal(APITestCase):
         Vendor.objects.all().delete()
         PurchaseOrder.objects.all().delete()
     
-
+    # test with one purchase order
     def test_only_one_purchase_order(self):
         purchase_order = PurchaseOrder.objects.create(vendor=self.vendor, **self.data)
         #acknowledge purchase order
@@ -548,7 +566,7 @@ class TestPurchaseOrderDeletePerfomanceMetricsSignal(APITestCase):
         self.assertEqual(vendor.average_response_time, 0.0)
     
 
-
+    # test with multiple purchase order
     def test_multiple_purchase_order_delete(self):
         n = 5
         # add pending purchase orders
