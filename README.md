@@ -16,7 +16,7 @@
   Clone the github repository to your local machine:
 
   ```bash
-  git clone https://github.com/febinmathew-xd/QuizApp-React.git
+  git clone https://github.com/febinmathew-xd/vendor-management-system.git
   ```
 
 - **Setup a Virtual Environment**
