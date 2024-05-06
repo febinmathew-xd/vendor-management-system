@@ -6,8 +6,6 @@
 - #### [API Documentation](#api-documentation)
 - #### [Tests](#test-documentation)
 
----
-
 ## Setup
 
 - **Requirements**
@@ -45,8 +43,6 @@
   python manage.py runserver
   ```
 
----
-
 ## API DOCUMENTATION
 
 ### Overview
@@ -57,11 +53,7 @@ The vendor management system API allows developers to manage **user**, **vendors
 
 Authentication is required for all endpoints. Client must provide a valid access key in the `Authorization` header.
 
----
-
 ## Endpoints:
-
----
 
 ## User
 
@@ -103,8 +95,6 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Error**
   - `400 BAD_REQUEST` : Request body is invalid.possibly due to missing required field.
 
----
-
 ## Authorization Tokens (access token, refresh token)
 
 ### Obtain Token Pair
@@ -142,8 +132,6 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Error :**
   - `400 BAD_REQUEST` invalid or missing required fields.
   - `401 UNAUTHORIZED` incorrect username or password.
-
----
 
 ## Vendor
 
@@ -203,7 +191,7 @@ Authentication is required for all endpoints. Client must provide a valid access
   - `400 BAD_REQUEST` Invalid or missing required field.
   - `401 UNAUTHORIZED` Expired/invalid access token or access token is not provided.
 
-  ***
+---
 
 ### List All Vendors
 
@@ -222,7 +210,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 
   - `401 UNAUTHORIZED` Expired/invalid `access` token or `access` token is not provided.
 
-  ***
+---
 
 ### Get Vendor by ID
 
@@ -260,7 +248,7 @@ Authentication is required for all endpoints. Client must provide a valid access
     vendor details not found.
   - `401 UNAUTHORIZED` Expired/invalid `access` token or `access` token is not provided.
 
-  ***
+---
 
 ### Update Vendor by ID
 
@@ -308,7 +296,7 @@ Authentication is required for all endpoints. Client must provide a valid access
   - `403 FORBIDDEN` `user` doesnot have the permission to update `vendor`. Because of `user` is not the owner of the `vendor`.
   - `401 UNAUTHORIZED` Expired/invalid `access` token or `access` token is not provided.
 
-  ***
+---
 
 ### Delete Vendor by ID
 
@@ -338,7 +326,7 @@ Authentication is required for all endpoints. Client must provide a valid access
   - `403 FORBIDDEN` `user` doesnot have the permission to delete `vendor`. Because of `user` is not the owner of the `vendor`.
   - `401 UNAUTHORIZED` Expired/invalid `access` token or `access` token is not provided.
 
-  ***
+---
 
 ### Get Vendor Performance
 
@@ -368,8 +356,6 @@ Authentication is required for all endpoints. Client must provide a valid access
   - `404 NOT_FOUND` Provided `vendor_id` is not valid.
     vendor details not found.
   - `401 UNAUTHORIZED` Expired/invalid `access` token or `access` token is not provided.
-
----
 
 ## Purchase Order
 
@@ -437,7 +423,7 @@ Authentication is required for all endpoints. Client must provide a valid access
   - `400 BAD_REQUEST` Invalid or missing required field.
   - `401 UNAUTHORIZED` Expired/invalid access token or access token is not provided.
 
-  ***
+---
 
 ### Acknowledge Purchase Order
 
@@ -465,7 +451,7 @@ Authentication is required for all endpoints. Client must provide a valid access
   - `404 NOT_FOUND` Invalid purchase order id `po_id` .
   - `401 UNAUTHORIZED` Expired/invalid `access` token or `access` token is not provided.
 
-  ***
+---
 
 ### List All Purchase Order (Filter by Vendor)
 
@@ -488,7 +474,7 @@ Authentication is required for all endpoints. Client must provide a valid access
   - `404 NOT_FOUND` Vendor with `id` not found. Invalid `id` .
   - `401 UNAUTHORIZED` Expired/invalid `access` token or `access` token is not provided.
 
-  ***
+---
 
 ### Get Purchase Order by ID
 
@@ -530,7 +516,7 @@ Authentication is required for all endpoints. Client must provide a valid access
     Purchase order not found.
   - `401 UNAUTHORIZED` Expired/invalid `access` token or `access` token is not provided.
 
-  ***
+---
 
 ### Update Purchase Order by ID
 
@@ -581,7 +567,7 @@ Authentication is required for all endpoints. Client must provide a valid access
     Purchase order not found.
   - `401 UNAUTHORIZED` Expired/invalid `access` token or `access` token is not provided.
 
-  ***
+---
 
 ### Delete Purchase Order by ID
 
@@ -609,8 +595,6 @@ Authentication is required for all endpoints. Client must provide a valid access
     vendor details not found.
   - `403 FORBIDDEN` Vendor doesnot have the permission to delete purchase order. (not owner)
   - `401 UNAUTHORIZED` Expired/invalid `access` token or `access` token is not provided.
-
----
 
 # Test Documentation
 
