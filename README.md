@@ -95,6 +95,8 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Error**
   - `400 BAD_REQUEST` : Request body is invalid.possibly due to missing required field.
 
+---
+
 ## Authorization Tokens (access token, refresh token)
 
 ### Obtain Token Pair
@@ -132,6 +134,8 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Error :**
   - `400 BAD_REQUEST` invalid or missing required fields.
   - `401 UNAUTHORIZED` incorrect username or password.
+
+---
 
 ## Vendor
 
@@ -356,6 +360,8 @@ Authentication is required for all endpoints. Client must provide a valid access
   - `404 NOT_FOUND` Provided `vendor_id` is not valid.
     vendor details not found.
   - `401 UNAUTHORIZED` Expired/invalid `access` token or `access` token is not provided.
+
+---
 
 ## Purchase Order
 
