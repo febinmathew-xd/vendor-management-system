@@ -224,7 +224,7 @@ class AcknowledgePurchaseOrder(APIView):
             vendor.average_response_time = average_response_time
             vendor.save()
             
-            return Response({"message": "acknowledged by the vendor"}, status=status.HTTP_200_OK)
+            return Response({"message": "purchase order acknowledged by the vendor"}, status=status.HTTP_200_OK)
         
         
         except PurchaseOrder.DoesNotExist:
