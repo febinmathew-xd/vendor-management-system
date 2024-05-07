@@ -3,7 +3,7 @@
 ## Contents
 
 - #### [Setup](#setup)
-- #### [API Documentation](#api-documentation)
+- #### [API Documentations](#api-documentation)
 - #### [Tests](#test-documentation)
 
 ## Setup
