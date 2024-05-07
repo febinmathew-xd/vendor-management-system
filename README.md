@@ -126,8 +126,8 @@ Authentication is required for all endpoints. Client must provide a valid access
   - **Example Body :**
     ```json
     {
-      "access": "hhsfd78h3JYJefssdfsfwDFD34fweft4343DFD42e3dg3dgds2DFDl9slFGDDzasd9f89sdydvd8",
-      "refresh": "ssdFBFGDGfsfwDFD34fwe3dg3dgds2DFDl9slFGDffd5tRTRTRDzasd9f45RTR489sdydvRTTd8"
+      "access": "hhsfd78h3JYJefssdfsfwDFD34fweft4343DFD42e3dg3dgds",
+      "refresh": "ssdFBFGDGfsfwDFD34fwe3dg3dgds2DFDl9slFGDffd5tRTR"
     }
     ```
 
