@@ -10,14 +10,14 @@
 
 - **Requirements**
   `python` `v.3.10` (_recommended version_) .
-- **Clone Github Repository**
+- **Clone Github Repository**  
   Clone the github repository to your local machine:
 
   ```bash
   git clone https://github.com/febinmathew-xd/vendor-management-system.git
   ```
 
-- **Setup a Virtual Environment**
+- **Setup a Virtual Environment**  
   create a new virtual environment and activate it:
 
   ```bash
@@ -27,14 +27,14 @@
   source venv/bin/activate
   ```
 
-- **Install Dependencies**
+- **Install Dependencies**  
   After activating virtual environment, install the required packages:
 
   ```bash
   pip install -r requirements.txt
   ```
 
-- **Migrate the Database and Start Server**
+- **Migrate the Database and Start Server**  
   With everything set up, migrate the database and run the development server:
 
   ```bash
@@ -105,7 +105,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Method :** `POST`
 - **Description :** Get `access` token and `refresh` token for authentication and authorization of the user.
 - **Authentication :** Not required
-- **Request Body :**
+- **Request Body :**  
   (_required fields_)
   - `username` (_string_) : username of the user.
   - `password` (_string_) : password of the user.
@@ -146,16 +146,17 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Description :** Create a new vendor .
 - **Authentication :** (_required_) provide `access` token in `Authorization` header
 - **Request Body :**
+
   (_required_fields_)
 
-  - `user` (_integer_) user ID of the user.
-  - `name` (_string_) name of the new vendor.
-  - `contact_details` (_string_) contact details of the vendor.
-  - `address` (_string_) address of the vendor.
+  - `user` (_integer_) : user ID of the user.
+  - `name` (_string_) : name of the new vendor.
+  - `contact_details` (_string_) : contact details of the vendor.
+  - `address` (_string_) : address of the vendor.
 
   (_optional fields_)
 
-  - `vendor_code` (_string_) (_unique_) unique identification code for the vendor
+  - `vendor_code` (_string_) (_unique_) : unique identification code for the vendor
 
 - **Example Request Body:**
 
@@ -371,18 +372,18 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Method :** `POST`
 - **Description :** Create a purchase order .
 - **Authentication :** (_required_) provide `access` token in `Authorization` header .
-- **Request Body :**
+- **Request Body :**  
   (_required_fields_)
 
-  - `vendor` (_integer_) `id` of the vendor.
-  - `delivery_date` (_datetime_) Expected or actual delivery date of the order.
-  - `items` (_json_) details of the items ordered.
-  - `quantity` (_integer_) total quantity of items in the purchase order.
+  - `vendor` (_integer_) : `id` of the vendor.
+  - `delivery_date` (_datetime_) : Expected or actual delivery date of the order.
+  - `items` (_json_) : details of the items ordered.
+  - `quantity` (_integer_) : total quantity of items in the purchase order.
 
   (_optional fields_)
 
-  - `po_number` (_string_) (_unique_) Unique number for identifying the purchase order.
-  - `quality_rating` (_float_) Rating given to the vendor for this purchase order (nullable) .
+  - `po_number` (_string_) (_unique_) : Unique number for identifying the purchase order.
+  - `quality_rating` (_float_) : Rating given to the vendor for this purchase order (nullable) .
 
 - **Example Request Body:**
 
