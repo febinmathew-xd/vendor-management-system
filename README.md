@@ -3,14 +3,14 @@
 ## Contents
 
 - #### [Setup](#setup)
-- #### [API Documentation](#api-doc)
+- #### [API Documentations](#api-documentation)
 - #### [Tests](#test-documentation)
 
 ## Setup
 
 - **Requirements**
 
-  `python` `v.3.10` (_recommended version_) .
+  `python` `v.3.10` (_recommended version_)
 
 - **Clone Github Repository**  
   Clone the github repository to your local machine:
@@ -45,7 +45,7 @@
   python manage.py runserver
   ```
 
-## API DOCUMENTATION {#api-doc}
+## API DOCUMENTATION
 
 ### Overview
 
@@ -66,9 +66,13 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Description :** Create a new user.
 - **Authentication :** Not required
 - **Request Body :**
-  - `username` (_string_) : Username for the new user. (_required_)
-  - `email` (_string_) : The user's email address. (_required_)
-  - `password`(_string_) : Password for the new user. (_required_)
+
+  (_required fields_)
+
+  - `username` (_string_) : Username for the new user.
+  - `email` (_string_) : The user's email address.
+  - `password`(_string_) : Password for the new user.
+
 - **Example Request Body:**
 
   ```json
@@ -152,7 +156,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Endpoint :** `/api/vendors/`
 - **Method :** `POST`
 - **Description :** Create a new vendor .
-- **Authentication :** (_required_) provide `access` token in `Authorization` header
+- **Authentication :** (_required_) provide `access` token in `Authorization` header.
 - **Request Body :**
 
   (_required fields_)
@@ -164,7 +168,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 
   (_optional fields_)
 
-  - `vendor_code` (_string_) (_unique_) : unique identification code for the vendor
+  - `vendor_code` (_string_) (_unique_) : unique identification code for the vendor.
 
 - **Example Request Body:**
 
@@ -212,7 +216,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Endpoint :** `/api/vendors/`
 - **Method :** `GET`
 - **Description :** List all vendors.
-- **Authentication :** provide `access` token in `Authorization` header. (_required_)
+- **Authentication :** provide `access` token in `Authorization` header (_required_).
 - **Request Body :** None
 - **Response :**  
   On successful request, the API will return following response:
@@ -232,7 +236,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Method :** `GET`
 - **Parameter :** `vendor_id` ID of the vendor .
 - **Description :** Retrive a specific vendor details by `vendor_id`.
-- **Authentication :** provide `access` token in `Authorization` header. (_required_)
+- **Authentication :** provide `access` token in `Authorization` header (_required_).
 - **Request Body :** None
 - **Response :**  
   On successful request, the API will return following response:
@@ -268,9 +272,9 @@ Authentication is required for all endpoints. Client must provide a valid access
 
 - **Endpoint :** `/api/vendors/{vendor_id}/`
 - **Method :** `PUT`
-- **Parameter :** `vendor_id` id of the vendor
+- **Parameter :** `vendor_id` id of the vendor.
 - **Description :** Update a specific vendor details by `vendor_id`.
-- **Authentication :** provide `access` token in `Authorization` header. (_required_)
+- **Authentication :** provide `access` token in `Authorization` header (_required_).
 - **Request Body :** Fields which you want to update.All field is not required .
 
 - **Example Request Body :**
@@ -320,7 +324,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Method :** `DELETE`
 - **Parameter :** `vendor_id` id of the vendor .
 - **Description :** Delete a specific vendor by `vendor_id`.
-- **Authentication :** provide `access` token in `Authorization` header. (_required_)
+- **Authentication :** provide `access` token in `Authorization` header (_required_).
 - **Request Body :** None
 - **Response :**  
   On successful request, the API will return following response:
@@ -350,7 +354,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Method :** `GET`
 - **Parameter :** `vendor_id` id of the vendor.
 - **Description :** Retrieves the calculated performance metrics for a specific vendor.
-- **Authentication :** provide `access` token in `Authorization` header. (_required_)
+- **Authentication :** provide `access` token in `Authorization` header (_required_).
 - **Request Body :** None
 - **Response :**  
   On successful request, the API will return following response:
@@ -452,14 +456,14 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Method :** `POST`
 - **Paramater :** `po_id` purchase order id .
 - **Description :** Update `acknowledgement_date` of the purchase order with `po_id` .
-- **Authentication :** (_required_) provide `access` token in `Authorization` header
+- **Authentication :** (_required_) provide `access` token in `Authorization` header.
 - **Request Body :** None
 
 - **Response :**  
   On successful request, the API will return the following response:
 
   - **Status :** `200 OK`
-  - **Body :** `message` saying purchase order acknowledged by the vendor .
+  - **Body :** `message` saying purchase order acknowledged by the vendor.
   - **Example Body :**
 
     ```json
@@ -468,7 +472,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 
 - **Error :**
 
-  - `403 BAD_REQUEST` `vendor` doesnot have the permission to acknowldge the purchase order (not owner) .
+  - `403 BAD_REQUEST` `vendor` doesnot have the permission to acknowldge the purchase order (not owner).
   - `404 NOT_FOUND` Invalid purchase order id `po_id` .
   - `401 UNAUTHORIZED` Expired/invalid `access` token or `access` token is not provided.
 
@@ -478,9 +482,9 @@ Authentication is required for all endpoints. Client must provide a valid access
 
 - **Endpoint :** `/api/purchase_orders/?vendor_id={id}`
 - **Method :** `GET`
-- **Paramater :** `id` vendor id
+- **Paramater :** `id` vendor id.
 - **Description :** List all purchase order with an option to filter by vendor.
-- **Authentication :** (_required_) provide `access` token in `Authorization` header
+- **Authentication :** (_required_) provide `access` token in `Authorization` header.
 - **Request Body :** None
 
 - **Response :**  
@@ -503,7 +507,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Method :** `GET`
 - **Parameter :** `po_id` purchase order id.
 - **Description :** Retrive a specific purchase order details by `po_id` .
-- **Authentication :** provide `access` token in `Authorization` header. (_required_)
+- **Authentication :** provide `access` token in `Authorization` header (_required_).
 - **Request Body :** None
 - **Response :**  
   On successful request, the API will return following response:
@@ -545,7 +549,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Method :** `PUT`
 - **Parameter :** `po_id` purchase order id.
 - **Description :** Update a specific purchase order details by `po_id` .
-- **Authentication :** provide `access` token in `Authorization` header. (_required_)
+- **Authentication :** provide `access` token in `Authorization` header (_required_).
 - **Request Body :** Fields which you want to update .All fields are not required .
 - **Example Request Body :**
 
@@ -585,7 +589,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Error :**
 
   - `400 BAD_REQUEST` Invalid request body data .
-  - `403 FORBIDDEN` Vendor doesnot have the permission to update the purchase order. (not owner)
+  - `403 FORBIDDEN` Vendor doesnot have the permission to update the purchase order (not owner).
   - `404 NOT_FOUND` Provided `po_id` is not valid.
     Purchase order not found.
   - `401 UNAUTHORIZED` Expired/invalid `access` token or `access` token is not provided.
@@ -598,7 +602,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Method :** `DELETE`
 - **Parameter :** `po_id` purchase order id .
 - **Description :** Delete a specific purchase by `po_id`.
-- **Authentication :** provide `access` token in `Authorization` header. (_required_)
+- **Authentication :** provide `access` token in `Authorization` header (_required_).
 - **Request Body :** None
 - **Response :**  
   On successful request, the API will return following response:
@@ -617,7 +621,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 
   - `404 NOT_FOUND` Provided `vendor_id` is not valid.
     vendor details not found.
-  - `403 FORBIDDEN` Vendor doesnot have the permission to delete purchase order. (not owner)
+  - `403 FORBIDDEN` Vendor doesnot have the permission to delete purchase order (not owner).
   - `401 UNAUTHORIZED` Expired/invalid `access` token or `access` token is not provided.
 
 # Test Documentation
@@ -650,18 +654,18 @@ These test cases focus on user creation and token-based authentication.
 
   - ##### Endpoint : `POST` `/api/user/register/`
   - ##### Tests :
-    - Create user using valid credentials
-    - Create user using invalid credentials
-    - Create user using missing credentials
-    - Create user using duplicate username
-    - Create user using invalid email address
+    - Create user using valid credentials.
+    - Create user using invalid credentials.
+    - Create user using missing credentials.
+    - Create user using duplicate username.
+    - Create user using invalid email address.
 
 - #### Obtain Token Pair
   - ##### Endpoint : `POST` `/api/token/`
   - ##### Tests :
-    - Generate token with proper credentials
-    - Generate token with invalid credentials
-    - Generate token with missing required fields
+    - Generate token with proper credentials.
+    - Generate token with invalid credentials.
+    - Generate token with missing required fields.
 
 ---
 
@@ -681,17 +685,17 @@ These test cases cover vendor creation, retrieval, delete and update operations.
 
   - ##### Endpoint : `POST` `/api/vendors/`
   - ##### Tests :
-    - Create vendor using valid data
-    - Create vendor using invalid data
-    - Create vendor with missing required fields
-    - Create vendor with unauthorized users
+    - Create vendor using valid data.
+    - Create vendor using invalid data.
+    - Create vendor with missing required fields.
+    - Create vendor with unauthorized users.
 
 - #### Retrive All Vendors
 
   - ##### Endpoint : `GET` `/api/vendors/`
   - ##### Tests :
-    - Retrive all vendors with proper authorization
-    - Retrive all vendors without authorization
+    - Retrive all vendors with proper authorization.
+    - Retrive all vendors without authorization.
 
 - #### Vendor Details by ID
 
@@ -705,7 +709,7 @@ These test cases cover vendor creation, retrieval, delete and update operations.
 
   - ##### Endpoint : `PUT` `/api/vendors/{vendor_id}/`
   - ##### Tests :
-    - Updating with valid `vendor_id`, valid data and authorized users.
+    - Updating with valid `vendor_id` , valid data and authorized users.
     - Updating with invalid `vendor_id` .
     - Updating with invalid data.
     - Updating with non-owner users.
@@ -715,7 +719,7 @@ These test cases cover vendor creation, retrieval, delete and update operations.
 
   - ##### Endpoint : `DELETE` `/api/vendors/{vendor_id}/`
   - ##### Tests :
-    - Delete with valid `vendor_id`, ownership and authorization.
+    - Delete with valid `vendor_id` , ownership and authorization.
     - Delete with invalid `vendor_id`.
     - Delete with non-owner users.
     - Delete with authorized users.
@@ -837,7 +841,7 @@ These test cases covers real time vendor performance metrics in various scenario
     - With canceled deliveries.
     - Accurate calculation if pending orders exists.
     - Recalculate and update metrics if any of the non pending purchase orders gets deleted.
-    - checking if any other field updations not affecting metrics
+    - checking if any other field updations not affecting metrics.
 
 - #### Average Response Time
   - ##### Tests :
