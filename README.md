@@ -9,7 +9,9 @@
 ## Setup
 
 - **Requirements**
+
   `python` `v.3.10` (_recommended version_) .
+
 - **Clone Github Repository**  
   Clone the github repository to your local machine:
 
@@ -77,7 +79,7 @@ Authentication is required for all endpoints. Client must provide a valid access
   }
   ```
 
-- **Response**
+- **Response :**  
   On successful creation, the api will return the following response:
 
   - **status :** `201 CREATED`
@@ -93,6 +95,7 @@ Authentication is required for all endpoints. Client must provide a valid access
     ```
 
 - **Error**
+
   - `400 BAD_REQUEST` : Request body is invalid.possibly due to missing required field.
 
 ---
@@ -105,10 +108,13 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Method :** `POST`
 - **Description :** Get `access` token and `refresh` token for authentication and authorization of the user.
 - **Authentication :** Not required
-- **Request Body :**  
+- **Request Body :**
+
   (_required fields_)
+
   - `username` (_string_) : username of the user.
   - `password` (_string_) : password of the user.
+
 - **Example Request Body:**
 
   ```json
@@ -118,12 +124,13 @@ Authentication is required for all endpoints. Client must provide a valid access
   }
   ```
 
-- **Response :**
+- **Response :**  
   on successful request the api will return the following response:
 
   - **status :** `200 OK`
   - **Body :** `access` `refresh`
   - **Example Body :**
+
     ```json
     {
       "access": "hhsfd78h3JYJefssdfsfwDFD34fweft4343DFD42e3dg3dgds",
@@ -132,6 +139,7 @@ Authentication is required for all endpoints. Client must provide a valid access
     ```
 
 - **Error :**
+
   - `400 BAD_REQUEST` invalid or missing required fields.
   - `401 UNAUTHORIZED` incorrect username or password.
 
@@ -147,7 +155,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Authentication :** (_required_) provide `access` token in `Authorization` header
 - **Request Body :**
 
-  (_required_fields_)
+  (_required fields_)
 
   - `user` (_integer_) : user ID of the user.
   - `name` (_string_) : name of the new vendor.
@@ -170,12 +178,13 @@ Authentication is required for all endpoints. Client must provide a valid access
   }
   ```
 
-- **Response :**
+- **Response :**  
   On successful creation, the API will return the following response:
 
   - **status :** `201 CREATED`
   - **Body :** `id` `name` `contact_details` `address` `vendor_code` `user` `fulfillment_rate` `on_time_delivery_rate` `quality_rating_avg` `average_response_time`
   - **Example Body :**
+
     ```json
     {
       "id": 1,
@@ -205,7 +214,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Description :** List all vendors.
 - **Authentication :** provide `access` token in `Authorization` header. (_required_)
 - **Request Body :** None
-- **Response :**
+- **Response :**  
   On successful request, the API will return following response:
 
   - **status :** `200 OK`
@@ -225,7 +234,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Description :** Retrive a specific vendor details by `vendor_id`.
 - **Authentication :** provide `access` token in `Authorization` header. (_required_)
 - **Request Body :** None
-- **Response :**
+- **Response :**  
   On successful request, the API will return following response:
 
   - **status :** `200 OK`
@@ -265,13 +274,15 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Request Body :** Fields which you want to update.All field is not required .
 
 - **Example Request Body :**
+
   ```json
   {
     "name": "new name",
     "address": "new address"
   }
   ```
-- **Response :**
+
+- **Response :**  
   On successful request, the API will return following response:
 
   - **status :** `200 OK`
@@ -311,7 +322,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Description :** Delete a specific vendor by `vendor_id`.
 - **Authentication :** provide `access` token in `Authorization` header. (_required_)
 - **Request Body :** None
-- **Response :**
+- **Response :**  
   On successful request, the API will return following response:
 
   - **status :** `200 OK`
@@ -341,7 +352,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Description :** Retrieves the calculated performance metrics for a specific vendor.
 - **Authentication :** provide `access` token in `Authorization` header. (_required_)
 - **Request Body :** None
-- **Response :**
+- **Response :**  
   On successful request, the API will return following response:
 
   - **status :** `200 OK`
@@ -358,6 +369,7 @@ Authentication is required for all endpoints. Client must provide a valid access
     ```
 
 - **Error :**
+
   - `404 NOT_FOUND` Provided `vendor_id` is not valid.
     vendor details not found.
   - `401 UNAUTHORIZED` Expired/invalid `access` token or `access` token is not provided.
@@ -372,8 +384,9 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Method :** `POST`
 - **Description :** Create a purchase order .
 - **Authentication :** (_required_) provide `access` token in `Authorization` header .
-- **Request Body :**  
-  (_required_fields_)
+- **Request Body :**
+
+  (_required fields_)
 
   - `vendor` (_integer_) : `id` of the vendor.
   - `delivery_date` (_datetime_) : Expected or actual delivery date of the order.
@@ -400,12 +413,13 @@ Authentication is required for all endpoints. Client must provide a valid access
   }
   ```
 
-- **Response :**
+- **Response :**  
   On successful creation, the API will return the following response:
 
   - **status :** `201 CREATED`
   - **Body :** `id` `po_number` `vendor` `delivery_date` `items` `quantity` `order_date` `status` `quality_rating` `issue_date` `acknowledgement_date`
   - **Example Body :**
+
     ```json
     {
       "id": 1,
@@ -441,7 +455,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Authentication :** (_required_) provide `access` token in `Authorization` header
 - **Request Body :** None
 
-- **Response :**
+- **Response :**  
   On successful request, the API will return the following response:
 
   - **Status :** `200 OK`
@@ -469,7 +483,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Authentication :** (_required_) provide `access` token in `Authorization` header
 - **Request Body :** None
 
-- **Response :**
+- **Response :**  
   On successful request, the API will return the following response:
 
   - **Status :** `200 OK`
@@ -491,7 +505,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Description :** Retrive a specific purchase order details by `po_id` .
 - **Authentication :** provide `access` token in `Authorization` header. (_required_)
 - **Request Body :** None
-- **Response :**
+- **Response :**  
   On successful request, the API will return following response:
 
   - **status :** `200 OK`
@@ -534,13 +548,15 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Authentication :** provide `access` token in `Authorization` header. (_required_)
 - **Request Body :** Fields which you want to update .All fields are not required .
 - **Example Request Body :**
+
   ```json
   {
     "status": "completed",
     "quality_rating": 5.0
   }
   ```
-- **Response :**
+
+- **Response :**  
   On successful request, the API will return following response:
 
   - **status :** `200 OK`
@@ -584,20 +600,21 @@ Authentication is required for all endpoints. Client must provide a valid access
 - **Description :** Delete a specific purchase by `po_id`.
 - **Authentication :** provide `access` token in `Authorization` header. (_required_)
 - **Request Body :** None
-- **Response :**
+- **Response :**  
   On successful request, the API will return following response:
 
   - **status :** `200 OK`
   - **Body :** `message` saying vendor successfully deleted.
   - **Example Body :**
 
-  ```json
-  {
-    "message": "successfully deleted"
-  }
-  ```
+    ```json
+    {
+      "message": "successfully deleted"
+    }
+    ```
 
 - **Error :**
+
   - `404 NOT_FOUND` Provided `vendor_id` is not valid.
     vendor details not found.
   - `403 FORBIDDEN` Vendor doesnot have the permission to delete purchase order. (not owner)
