@@ -45,7 +45,7 @@
   python manage.py runserver
   ```
 
-## API DOCUMENTATION
+# API DOCUMENTATION
 
 ### Overview
 
