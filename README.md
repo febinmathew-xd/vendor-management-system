@@ -3,7 +3,7 @@
 ## Contents
 
 - #### [Setup](#setup)
-- #### [API Documentations](#api-documentation)
+- #### [API Documentation](#api-doc)
 - #### [Tests](#test-documentation)
 
 ## Setup
@@ -45,7 +45,7 @@
   python manage.py runserver
   ```
 
-## API DOCUMENTATION
+## API DOCUMENTATION {#api-doc}
 
 ### Overview
 
@@ -624,7 +624,7 @@ Authentication is required for all endpoints. Client must provide a valid access
 
 ## Running All Tests
 
-Inorder to run all tests, run the following command from the `root` directory of the project(where `manage.py` is located) .
+Inorder to run all tests, execute the following command from the `root` directory of the project(where `manage.py` is located) .
 
 ```bash
 python manage.py test
@@ -667,7 +667,7 @@ These test cases focus on user creation and token-based authentication.
 
 ### Vendor Management Tests
 
-To run vendor-related tests, use the following command from the root directory:
+To run vendor-related tests, execute the following command from the root directory:
 
 ```bash
 python manage.py test --pattern="test_vendor.py"
@@ -681,10 +681,10 @@ These test cases cover vendor creation, retrieval, delete and update operations.
 
   - ##### Endpoint : `POST` `/api/vendors/`
   - ##### Tests :
-    - Using valid data
-    - Using invalid data
-    - With missing required fields
-    - With unauthorized users
+    - Create vendor using valid data
+    - Create vendor using invalid data
+    - Create vendor with missing required fields
+    - Create vendor with unauthorized users
 
 - #### Retrive All Vendors
 
@@ -731,7 +731,7 @@ These test cases cover vendor creation, retrieval, delete and update operations.
 
 ### Purchase Order Tests
 
-To run vendor-related tests, use the following command from the root directory:
+To run purchase order related tests, execute the following command from the root directory:
 
 ```bash
 python manage.py test --pattern="test_purchase_order.py"
@@ -798,7 +798,7 @@ These test cases cover purchase order creation, retrieval, delete and update ope
 
 ### Signal Handler Test (Metrics Calculations)
 
-To run real time metrics calulations (_signal handler_) related tests, use the following command from the root directory:
+To run real time metrics calulations (_signal handler_) related tests, execute the following command from the root directory:
 
 ```bash
 python manage.py test --pattern="test_signals.py"
